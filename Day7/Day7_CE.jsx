@@ -1,150 +1,50 @@
-db.json:
+import React, { useEffect, useState } from 'react';
 
-{
-  "book": [
-    {
-      "id": 1,
-      "title": "The Lost Chronicles",
-      "author": "Emily Winters"
-    },
-    {
-      "id": 2,
-      "title": "Echoes of the Past",
-      "author": "James Parker"
-    },
-    {
-      "id": 3,
-      "title": "Whispers of the Night",
-      "author": "Sophia Greene"
-    },
-    {
-      "id": 4,
-      "title": "Journey to the Unknown",
-      "author": "Liam Carter"
-    },
-    {
-      "id": 5,
-      "title": "The Hidden Truth",
-      "author": "Ava Thompson"
-    },
-    {
-      "id": 6,
-      "title": "Beneath the Surface",
-      "author": "Oliver Smith"
-    },
-    {
-      "id": 7,
-      "title": "The Final Frontier",
-      "author": "Isabella Lee"
-    },
-    {
-      "id": "130f",
-      "title": "Life of Pi",
-      "author": "Ang Lee"
-    }
-  ]
-}
+const App = () => {
+  const [books, setBooks] = useState([]);
+  const [error, setError] = useState(null);
 
-export default GetDemo;
+  // Fetch and transform data
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const response = await fetch('https://example.com/books');
+        const json = await response.json();
 
-import axios from 'axios';
+        // Transform the data into the required format
+        const transformedData = json.data.map((book) => ({
+          id: book.id,
+          title: book.title,
+          author: book.author,
+        }));
 
-const instance = axios.create({
-  baseURL: 'http://localhost:3000',
-});
-
-export default instance;
-
-
-
-import { useEffect, useState } from 'react';
-import Axios from 'axios';
-
-const GetDemo = () => {
-    const [books, setBooks] = useState([]);
-    const [title, setTitle] = useState('');
-    const [author, setAuthor] = useState('');
-
-    useEffect(() => {
-        fetchBooks();
-    }, []);
-
-    const fetchBooks = () => {
-        Axios.get('http://localhost:3000/book') // Changed 'books' to 'book'
-            .then(res => {
-                const transformedData = res.data.map(book => ({ // Changed res.data.data to res.data
-                    id: book.id,
-                    title: book.title,
-                    author: book.author
-                }));
-                setBooks(transformedData);
-            })
-            .catch(err => console.error('Error fetching books:', err));
+        setBooks(transformedData);
+      } catch (err) {
+        setError('Failed to fetch book data');
+      }
     };
 
-    const addNewBook = () => {
-        const newBook = { title, author };
-        Axios.post('http://localhost:3000/book', newBook) // Changed 'books' to 'book'
-            .then(res => {
-                // Assign the new ID based on the existing books array
-                setBooks([...books, { ...newBook, id: books.length + 1 }]); // This works if the server returns the new book with an ID
-            })
-            .catch(err => console.error('Error adding book:', err));
-        setTitle(''); // Clear input
-        setAuthor(''); // Clear input
-    };
+    fetchBooks();
+  }, []);
 
-    const deleteBook = (id) => {
-        if (window.confirm("Are you sure you want to delete this book?")) {
-            Axios.delete(http://localhost:3000/book/${id}) // Changed 'books' to 'book'
-                .then(() => {
-                    setBooks(books.filter(book => book.id !== id));
-                })
-                .catch(err => console.error('Error deleting book:', err));
-        }
-    };
+  return (
+    <div style={{ padding: '20px', textAlign: 'center' }}>
+      <h2>Book List</h2>
 
-    return (
-        <div>
-            <h1>Books</h1>
-            <h2>Add New Book</h2>
-            <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Title"
-            />
-            <input
-                type="text"
-                value={author}
-                onChange={(e) => setAuthor(e.target.value)}
-                placeholder="Author"
-            />
-            <button onClick={addNewBook}>Add New</button>
-           
-            <h2>Book List</h2>
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Title</th>
-                        <th>Author</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {books.map((book) => (
-                        <tr key={book.id}>
-                            <td>{book.id}</td>
-                            <td>{book.title}</td>
-                            <td>{book.author}</td>
-                            <td>
-                                <button onClick={() => deleteBook(book.id)}>Delete</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    );
+      {error ? (
+        <p style={{ color: 'red' }}>{error}</p>
+      ) : (
+        <ul style={{ listStyleType: 'none', padding: 0 }}>
+          {books.map((book) => (
+            <li key={book.id} style={{ margin: '10px 0' }}>
+              <h3>{book.title}</h3>
+              <p>by {book.author}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 };
+
+export default App;
